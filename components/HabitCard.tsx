@@ -14,6 +14,8 @@ export function HabitCard({ habit, index }: Props) {
 
   const name = useSelector(habit, (s) => s.context.name);
   const completedDates = useSelector(habit, (s) => s.context.completedDates);
+  console.log("completedDates:: ", completedDates)
+  console.log("Today:: ", today)
   const isCompletedToday = completedDates.includes(today);
 
   return (

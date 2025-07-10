@@ -1,4 +1,4 @@
-import { assign, setup } from 'xstate';
+import { assign, sendParent, setup } from 'xstate';
 
 type HabitContext = {
   name: string;
@@ -31,28 +31,38 @@ export const habitMachine = setup({
       tracking: {
         on: {
           MARK_COMPLETE: {
-            actions: assign(({context, event}) => {
-              if (event?.type === 'MARK_COMPLETE') {
-                if (!context.completedDates.includes(event.date)) {
-                  return {
-                    completedDates: [...context.completedDates, event.date],
-                  };
+            actions: [
+              assign(({context, event}) => {
+                if (event?.type === 'MARK_COMPLETE') {
+                  if (!context.completedDates.includes(event.date)) {
+                    return {
+                      completedDates: [...context.completedDates, event.date],
+                    };
+                  }
                 }
-              }
-              return {};
-            }),
+                return {};
+              }),
+              sendParent(() => ({
+                type: 'PERSIST_HABITS',
+              })),
+            ]
           },
           UNMARK_COMPLETE: {
-            actions: assign(({context, event}) => {
-              if (event?.type === 'UNMARK_COMPLETE') {
-                return {
-                  completedDates: context.completedDates.filter(
-                    (d) => d !== event.date
-                  ),
-                };
-              }
-              return {};
-            }),
+            actions: [
+              assign(({context, event}) => {
+                if (event?.type === 'UNMARK_COMPLETE') {
+                  return {
+                    completedDates: context.completedDates.filter(
+                      (d) => d !== event.date
+                    ),
+                  };
+                }
+                return {};
+              }),
+              sendParent(() => ({
+                type: 'PERSIST_HABITS',
+              })),
+            ]
           },
         },
       },
