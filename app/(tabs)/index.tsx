@@ -7,7 +7,6 @@ import { Button, Text, TextInput, View } from 'react-native';
 export default function HabitListScreen() {
   const habitList = useHabitListMachine();
   const habits = useSelector(habitList, (s) => s.context.habits);
-  console.log("HABITS::: ", habits)
   const [name, setName] = useState('');
 
   return (

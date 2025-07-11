@@ -35,7 +35,6 @@ export const habitListMachine = setup({
       habits: ({ event, spawn, context }) => {
         if (event.type !== 'HYDRATE') return context.habits;
 
-        console.log("Hydrate data::: ", event.data)
         return event.data.map((snapshot) =>
           spawn('habit', { input: snapshot })
         );
@@ -45,7 +44,6 @@ export const habitListMachine = setup({
       const data = context.habits.map(
         (actor) => actor.getSnapshot().context
       );
-      console.log("Persist data::: ", data)
       saveHabits(data);
     },
   },
@@ -68,7 +66,6 @@ export const habitListMachine = setup({
       actions: [
         assign({
           habits: ({ context, spawn, event }) => {
-            console.log("Add habit event::: ", event)
             const newHabit = spawn('habit', {
               input: {
                 name: event.name,
