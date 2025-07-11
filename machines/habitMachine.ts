@@ -10,22 +10,17 @@ type HabitEvent =
   | { type: 'MARK_COMPLETE'; date: number }
   | { type: 'UNMARK_COMPLETE'; date: number };
 
-const initialContext: HabitContext = {
-  name: '',
-  createdAt: Date.now(),
-  completedDates: [],
-};
-
 export const habitMachine = setup({
   types: {
     context: {} as HabitContext,
     events: {} as HabitEvent,
+    input: {} as HabitContext,
   },
 }).createMachine(
   {
     id: 'habit',
     initial: 'tracking',
-    context: initialContext,
+    context: ({ input }) => input,
 
     states: {
       tracking: {
