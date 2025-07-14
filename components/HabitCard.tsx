@@ -2,7 +2,7 @@ import { habitListMachine } from '@/machines/habitListMachine';
 import { habitMachine } from '@/machines/habitMachine';
 import { getTodayDate } from '@/utils/date';
 import { useSelector } from '@xstate/react';
-import { Alert, Button, Text, View } from 'react-native';
+import { Alert, Button, Platform, Text, View } from 'react-native';
 import type { ActorRefFrom } from 'xstate';
 
 type Props = {
@@ -18,18 +18,23 @@ export function HabitCard({ habit, index, habitList }: Props) {
   const isCompletedToday = completedDates.includes(today);
 
   const confirmDelete = () => {
-    Alert.alert(
-      'Delete Habit',
-      `Are you sure you want to delete "${name || `Habit ${index + 1}`}"?`,
-      [
+    const message = `Are you sure you want to delete "${name || `Habit ${index + 1}`}"?`;
+  
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm(message);
+      if (confirmed) {
+        habitList.send({ type: 'REMOVE_HABIT', index });
+      }
+    } else {
+      Alert.alert('Delete Habit', message, [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: () => habitList.send({ type: 'REMOVE_HABIT', index }),
         },
-      ]
-    );
+      ]);
+    }
   };
 
   return (
