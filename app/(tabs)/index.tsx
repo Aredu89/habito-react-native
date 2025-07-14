@@ -14,7 +14,7 @@ export default function HabitListScreen() {
       <Text className="text-2xl font-bold text-center mb-4 text-blue-600">Your Habits</Text>
 
       {habits.map((habit, index) => (
-        <HabitCard key={index} habit={habit} index={index} />
+        <HabitCard key={index} habit={habit} index={index} habitList={habitList} />
       ))}
 
       <View className="flex-row mt-6 items-center justify-between gap-2">
