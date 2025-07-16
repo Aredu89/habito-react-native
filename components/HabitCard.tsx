@@ -4,6 +4,7 @@ import { getTodayDate } from '@/utils/date';
 import { useSelector } from '@xstate/react';
 import { Alert, Button, Platform, Text, View } from 'react-native';
 import type { ActorRefFrom } from 'xstate';
+import { HabitCalendar } from './HabitCalendar';
 
 type Props = {
   habit: ActorRefFrom<typeof habitMachine>;
@@ -57,6 +58,13 @@ export function HabitCard({ habit, index, habitList }: Props) {
           }
         />
         <Button title="Delete" color="#ff4444" onPress={confirmDelete} />
+      </View>
+
+      <View className="mt-4">
+        <HabitCalendar
+          completedDates={completedDates}
+          mode="week"
+        />
       </View>
     </View>
   );
