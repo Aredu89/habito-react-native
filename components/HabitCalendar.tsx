@@ -1,57 +1,36 @@
-import dayjs from 'dayjs';
-import { useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import {
+  addDays,
+  isSameDay,
+  isSameMonth,
+  startOfMonth,
+  startOfWeek
+} from 'date-fns';
+import { Text, View } from 'react-native';
 
 // Props
 interface HabitCalendarProps {
   completedDates: number[];
   mode: 'week' | 'month';
+  referenceDate?: Date;
 }
 
-export function HabitCalendar({ completedDates, mode }: HabitCalendarProps) {
-  const today = dayjs();
-  const [monthOffset, setMonthOffset] = useState(0);
-  const viewDate = today.add(monthOffset, 'month');
-  const startOfMonth = viewDate.startOf('month');
-  const endOfMonth = viewDate.endOf('month');
+export function HabitCalendar({ completedDates, mode, referenceDate = new Date() }: HabitCalendarProps) {
+  const completed = new Set(completedDates.map((d) => new Date(d).toDateString()));
 
-  const completedDaySet = new Set(
-    completedDates.map((ts) => dayjs(ts).format('YYYY-MM-DD'))
-  );
+  const today = new Date();
+  const start =
+    mode === 'week'
+      ? startOfWeek(referenceDate, { weekStartsOn: 0 }) // Sunday
+      : startOfWeek(startOfMonth(referenceDate), { weekStartsOn: 0 }); // Sunday before 1st of month
 
-  // Generate week or month days
-  let days: dayjs.Dayjs[] = [];
-
-  if (mode === 'week') {
-    const startOfWeek = today.startOf('week');
-    for (let i = 0; i < 7; i++) {
-      days.push(startOfWeek.add(i, 'day'));
-    }
-  } else {
-    const daysInMonth = viewDate.daysInMonth();
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(viewDate.date(i));
-    }
-  }
+  const totalDays = mode === 'week' ? 7 : 42;
+  const days = Array.from({ length: totalDays }, (_, i) => addDays(start, i));
 
   const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <View className="mt-4">
-      {mode === 'month' && (
-        <View className="flex-row justify-between items-center mb-2">
-          <TouchableOpacity onPress={() => setMonthOffset((prev) => prev - 1)}>
-            <Text className="text-blue-500">Previous</Text>
-          </TouchableOpacity>
-          <Text className="text-lg font-semibold dark:text-white">
-            {viewDate.format('MMMM YYYY')}
-          </Text>
-          <TouchableOpacity onPress={() => setMonthOffset((prev) => prev + 1)}>
-            <Text className="text-blue-500">Next</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
+    <View>
+      {/* Weekday header */}
       <View className="flex-row justify-between mb-2">
         {dayLabels.map((label) => (
           <Text key={label} className="flex-1 text-center text-xs font-medium text-gray-500">
@@ -60,28 +39,28 @@ export function HabitCalendar({ completedDates, mode }: HabitCalendarProps) {
         ))}
       </View>
 
-      <View className="flex-row flex-wrap justify-center">
-        {days.map((day) => {
-          const formatted = day.format('YYYY-MM-DD');
-          const isCompleted = completedDaySet.has(formatted);
-          const isToday = day.isSame(today, 'day');
+      {/* Calendar grid */}
+      <View className="flex-row flex-wrap">
+        {days.map((date, index) => {
+          const isCompleted = completed.has(date.toDateString());
+          const isToday = isSameDay(date, today);
+          const isInactive = mode === 'month' && !isSameMonth(date, referenceDate);
 
           return (
             <View
-              key={formatted}
-              className="w-[13.5%] aspect-square items-center justify-center m-0.3"
+              key={index}
+              className="w-[14.28%] aspect-square items-center justify-center"
             >
               <View
-                className={`w-8 h-8 rounded-full items-center justify-center ${
-                  isCompleted ? 'bg-green-500' : 'border border-gray-300'
-                } ${isToday ? 'ring-2 ring-blue-400' : ''}`}
+                className={[
+                  'w-6 h-6 rounded-full items-center justify-center',
+                  isCompleted ? 'bg-blue-500' : 'bg-gray-200',
+                  isInactive ? 'opacity-40' : '',
+                  isToday ? 'border border-black dark:border-white' : '',
+                ].join(' ')}
               >
-                <Text
-                  className={`text-sm font-medium ${
-                    isCompleted ? 'text-white' : 'text-black dark:text-white'
-                  }`}
-                >
-                  {day.date()}
+                <Text className="text-xs text-white">
+                  {date.getDate()}
                 </Text>
               </View>
             </View>
