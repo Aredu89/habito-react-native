@@ -1,11 +1,17 @@
 import {
   addDays,
+  addMonths,
+  addWeeks,
+  format,
   isSameDay,
   isSameMonth,
   startOfMonth,
-  startOfWeek
+  startOfWeek,
+  subMonths,
+  subWeeks
 } from 'date-fns';
-import { Text, View } from 'react-native';
+import { useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 // Props
 interface HabitCalendarProps {
@@ -14,22 +20,60 @@ interface HabitCalendarProps {
   referenceDate?: Date;
 }
 
-export function HabitCalendar({ completedDates, mode, referenceDate = new Date() }: HabitCalendarProps) {
-  const completed = new Set(completedDates.map((d) => new Date(d).toDateString()));
+export function HabitCalendar({
+  completedDates,
+  mode, 
+  referenceDate = new Date()
+}: HabitCalendarProps) {
+  const [currentDate, setCurrentDate] = useState(referenceDate);
+  console.log("currentDate::: ", currentDate)
+  const completed = new Set(
+    completedDates.map((d) => new Date(d).toDateString())
+  );
 
   const today = new Date();
   const start =
     mode === 'week'
-      ? startOfWeek(referenceDate, { weekStartsOn: 0 }) // Sunday
-      : startOfWeek(startOfMonth(referenceDate), { weekStartsOn: 0 }); // Sunday before 1st of month
+      ? startOfWeek(currentDate, { weekStartsOn: 0 }) // Sunday
+      : startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 }); // Sunday before 1st of month
 
   const totalDays = mode === 'week' ? 7 : 42;
   const days = Array.from({ length: totalDays }, (_, i) => addDays(start, i));
 
   const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+  const goBack = () => {
+    setCurrentDate((prev) =>
+      mode === 'week' ? subWeeks(prev, 1) : subMonths(prev, 1)
+    );
+  };
+
+  const goForward = () => {
+    setCurrentDate((prev) =>
+      mode === 'week' ? addWeeks(prev, 1) : addMonths(prev, 1)
+    );
+  };
+
+  const periodLabel =
+    mode === 'week'
+      ? `${format(start, 'MMM d')} – ${format(addDays(start, 6), 'MMM d')}`
+      : format(currentDate, 'MMMM yyyy');
+
   return (
     <View>
+      {/* Navigation Header */}
+      <View className="flex-row items-center justify-between mb-2">
+        <TouchableOpacity onPress={goBack}>
+          <Text className="text-xl px-2 text-white">←</Text>
+        </TouchableOpacity>
+        <Text className="text-center text-base font-semibold flex-1 text-white">
+          {periodLabel}
+        </Text>
+        <TouchableOpacity onPress={goForward}>
+          <Text className="text-xl px-2 text-white">→</Text>
+        </TouchableOpacity>
+      </View>
+      
       {/* Weekday header */}
       <View className="flex-row justify-between mb-2">
         {dayLabels.map((label) => (
@@ -44,7 +88,7 @@ export function HabitCalendar({ completedDates, mode, referenceDate = new Date()
         {days.map((date, index) => {
           const isCompleted = completed.has(date.toDateString());
           const isToday = isSameDay(date, today);
-          const isInactive = mode === 'month' && !isSameMonth(date, referenceDate);
+          const isInactive = mode === 'month' && !isSameMonth(date, currentDate);
 
           return (
             <View
