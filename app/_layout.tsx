@@ -12,7 +12,6 @@ import './global.css';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-
   const habitListActor = createActor(habitListMachine).start();
 
   return (
@@ -20,7 +19,8 @@ export default function RootLayout() {
       <HabitListContext.Provider value={habitListActor}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            {/* Your main screen will now be index.tsx */}
+            <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
           <StatusBar style="auto" />

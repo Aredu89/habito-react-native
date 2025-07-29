@@ -26,7 +26,6 @@ export function HabitCalendar({
   referenceDate = new Date()
 }: HabitCalendarProps) {
   const [currentDate, setCurrentDate] = useState(referenceDate);
-  console.log("currentDate::: ", currentDate)
   const completed = new Set(
     completedDates.map((d) => new Date(d).toDateString())
   );
